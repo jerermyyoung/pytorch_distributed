@@ -1,5 +1,5 @@
 import hf_env
-hf_env.set_env('202105')
+hf_env.set_env('202111')
 
 import os
 import time
@@ -101,8 +101,10 @@ def validate(dataloader, model, criterion, epoch, local_rank):
 def main(local_rank):
     # 超参数设置
     epochs = 100
-    batch_size = 400
-    num_workers = 4
+    # batch_size = 400
+    # num_workers = 4
+    batch_size = 512
+    num_workers = 8
     lr = 0.1
     momentum = 0.9
     weight_decay = 1e-4

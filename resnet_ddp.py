@@ -1,5 +1,5 @@
 import hf_env
-hf_env.set_env('202105')
+hf_env.set_env('202111')
 
 import os
 import time
@@ -11,7 +11,7 @@ from torch import nn
 from torch.nn.parallel import DistributedDataParallel
 from torch.utils.data.distributed import DistributedSampler
 from torch.optim import SGD
-from torch.optim.lr_scheduler import StepLR
+from torch.optim.lr_scheduler import StepLR, CosineAnnealingLR
 from torchvision import transforms, models
 
 from ffrecord.torch import Dataset, DataLoader
@@ -99,12 +99,14 @@ def validate(dataloader, model, criterion, epoch, local_rank):
 def main(local_rank):
     # 超参数设置
     epochs = 100
-    batch_size = 400
-    num_workers = 4
+    # batch_size = 400
+    # num_workers = 4
+    batch_size = 64
+    num_workers = 8
     lr = 0.1
     momentum = 0.9
     weight_decay = 1e-4
-    save_path = 'output/resnet_ddp'
+    save_path = 'output/resnet_tddp'
     Path(save_path).mkdir(exist_ok=True, parents=True)
 
     train_data = '/public_dataset/1/ImageNet/train.ffr'
@@ -160,7 +162,8 @@ def main(local_rank):
                     lr=lr,
                     momentum=momentum,
                     weight_decay=weight_decay)
-    scheduler = StepLR(optimizer, step_size=30, gamma=0.1)
+    # scheduler = StepLR(optimizer, step_size=30, gamma=0.1)
+    scheduler = CosineAnnealingLR(optimizer, T_max=epochs)
 
     # 加载
     best_acc, start_epoch, start_step = 0, 0, 0
